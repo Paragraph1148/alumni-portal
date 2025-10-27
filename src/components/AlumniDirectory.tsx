@@ -11,9 +11,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { Search, MapPin, Briefcase, Mail, Linkedin } from "lucide-react";
+import {
+  Search,
+  MapPin,
+  Briefcase,
+  Mail,
+  Linkedin,
+  RefreshCw,
+} from "lucide-react";
 import { useSearch } from "./SearchContext";
 import { projectId, publicAnonKey } from "../utils/supabase/info";
+import { useAuth } from "./AuthContext";
 
 const defaultAlumni = [
   {
@@ -89,17 +97,17 @@ export function AlumniDirectory() {
     searchQuery: globalSearchQuery,
     setSearchQuery: setGlobalSearchQuery,
   } = useSearch();
+  const { user } = useAuth();
   const [localSearchQuery, setLocalSearchQuery] = useState("");
   const [classYear, setClassYear] = useState("all");
   const [industry, setIndustry] = useState("all");
   const [alumni, setAlumni] = useState(defaultAlumni);
+  const [loading, setLoading] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   // Load alumni from server
-  useEffect(() => {
-    loadAlumni();
-  }, []);
-
   const loadAlumni = async () => {
+    setLoading(true);
     try {
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-d96042de/alumni`,
@@ -128,11 +136,30 @@ export function AlumniDirectory() {
         } else {
           setAlumni(defaultAlumni);
         }
+        setLastUpdated(new Date());
       }
     } catch (error) {
       console.error("Failed to load alumni:", error);
+    } finally {
+      setLoading(false);
     }
   };
+
+  // Load alumni on mount and set up refresh listener
+  useEffect(() => {
+    loadAlumni();
+
+    // Listen for profile updates to refresh data
+    const handleProfileUpdate = () => {
+      loadAlumni();
+    };
+
+    window.addEventListener("profileUpdated", handleProfileUpdate);
+
+    return () => {
+      window.removeEventListener("profileUpdated", handleProfileUpdate);
+    };
+  }, []);
 
   // Sync global search with local search
   useEffect(() => {
@@ -183,6 +210,10 @@ export function AlumniDirectory() {
     });
   }, [alumni, searchQuery, classYear, industry]);
 
+  const handleManualRefresh = () => {
+    loadAlumni();
+  };
+
   return (
     <section id="directory" className="py-16 bg-white">
       <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-8 lg:px-12">
@@ -193,6 +224,16 @@ export function AlumniDirectory() {
               Connect with alumni across industries, locations, and graduation
               years
             </p>
+          </div>
+
+          {/* Refresh and status section */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex items-center gap-4"></div>
+            {filteredAlumni.length > 0 && (
+              <div className="text-sm text-gray-600">
+                Showing {filteredAlumni.length} of {alumni.length} alumni
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col md:flex-row gap-4">
@@ -256,9 +297,6 @@ export function AlumniDirectory() {
             </div>
           ) : (
             <>
-              <div className="text-sm text-gray-600">
-                Showing {filteredAlumni.length} of {alumni.length} alumni
-              </div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {filteredAlumni.map((person) => (
                   <Card

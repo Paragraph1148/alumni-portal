@@ -82,10 +82,11 @@ export function NewsSection() {
 
       if (response.ok) {
         const data = await response.json();
-
-        setNews(data.news || []);
-      } else {
-        setNews(defaultNews);
+        if (data.news && data.news.length > 0) {
+          setNews(data.news || []);
+        } else {
+          setNews(defaultNews);
+        }
       }
     } catch (error) {
       console.error("Failed to load news:", error);

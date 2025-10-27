@@ -1,8 +1,18 @@
 import { Button } from "./ui/button";
 import { ArrowRight, Users } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { useNavigate } from "react-router-dom";
 
 export function Hero() {
+  const navigate = useNavigate();
+
+  const handleUpdateProfile = () => {
+    navigate("/profile");
+  };
+
+  const handleExploreDirectory = () => {
+    navigate("/directory");
+  };
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-8 lg:px-12 py-16 md:py-24">
@@ -12,21 +22,33 @@ export function Hero() {
               <Users className="h-4 w-4" />
               <span>Join 50,000+ alumni worldwide</span>
             </div>
-            
+
             <h1 className="text-4xl md:text-5xl lg:text-6xl tracking-tight">
-              Welcome to Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Alumni Network</span>
+              Welcome to Your{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                Alumni Network
+              </span>
             </h1>
-            
+
             <p className="text-lg text-gray-600 max-w-xl">
-              Connect with fellow graduates, discover career opportunities, attend exclusive events, and stay engaged with your alma mater.
+              Connect with fellow graduates, discover career opportunities,
+              attend exclusive events, and stay engaged with your alma mater.
             </p>
-            
+
             <div className="flex flex-wrap gap-4">
-              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                onClick={handleUpdateProfile}
+              >
                 Update Your Profile
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-              <Button size="lg" variant="outline">
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={handleExploreDirectory}
+              >
                 Explore Directory
               </Button>
             </div>

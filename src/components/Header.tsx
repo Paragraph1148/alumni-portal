@@ -169,19 +169,18 @@ export function Header() {
         </div>
       </div>
 
-      {/* Mobile Navigation Overlay - Fixed to cover entire screen */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-50 md:hidden flex flex-col">
-          {/* Backdrop */}
+          {/* Backdrop with shadow */}
           <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/60 backdrop-blur-md"
             onClick={() => setMobileMenuOpen(false)}
           />
 
-          {/* Menu Panel - Now covers full height and width */}
-          <div className="relative flex-1 flex flex-col bg-white">
+          {/* Menu Panel - Now covers full height and width with shadow */}
+          <div className="relative flex-1 flex flex-col bg-white shadow-2xl">
             {/* Header - Fixed height */}
-            <div className="flex-shrink-0 flex items-center justify-between p-4 border-b">
+            <div className="flex-shrink-0 flex items-center justify-between p-4 border-b bg-white">
               <h2 className="text-lg font-semibold">Menu</h2>
               <Button
                 variant="ghost"
@@ -192,7 +191,7 @@ export function Header() {
               </Button>
             </div>
 
-            {/* Content - Scrollable area that takes remaining space */}
+            {/* Rest of the mobile menu content remains exactly the same */}
             <div className="flex-1 overflow-y-auto p-4">
               {/* Mobile Search */}
               <div className="flex items-center gap-2 mb-6">
@@ -299,7 +298,6 @@ export function Header() {
           </div>
         </div>
       )}
-
       <LoginDialog open={loginOpen} onOpenChange={setLoginOpen} />
       <UserProfile open={profileOpen} onOpenChange={setProfileOpen} />
       <AdminDashboard open={adminOpen} onOpenChange={setAdminOpen} />

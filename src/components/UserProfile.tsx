@@ -11,7 +11,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { useAuth } from "./AuthContext";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 import { Badge } from "./ui/badge";
 import {
   User,

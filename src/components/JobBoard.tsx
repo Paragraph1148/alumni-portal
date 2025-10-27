@@ -1,9 +1,19 @@
+// components/JobBoard.tsx (updated)
 import { useState, useEffect } from "react";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
-import { Briefcase, MapPin, DollarSign, Clock, Building2 } from "lucide-react";
+import {
+  Briefcase,
+  MapPin,
+  DollarSign,
+  Clock,
+  Building2,
+  RefreshCw,
+} from "lucide-react";
 import { projectId, publicAnonKey } from "../utils/supabase/info";
+import { useAuth } from "./AuthContext";
+import { LoginDialog } from "./LoginDialog";
 
 const defaultJobs = [
   {
@@ -75,13 +85,15 @@ const defaultJobs = [
 ];
 
 export function JobBoard() {
+  const { user } = useAuth();
   const [jobs, setJobs] = useState(defaultJobs);
-
-  useEffect(() => {
-    loadJobs();
-  }, []);
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [postJobOpen, setPostJobOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const loadJobs = async () => {
+    setLoading(true);
     try {
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-d96042de/jobs`,
@@ -95,15 +107,42 @@ export function JobBoard() {
       if (response.ok) {
         const data = await response.json();
         if (data.jobs && data.jobs.length > 0) {
-          setJobs(data.jobs || []);
+          setJobs(data.jobs);
         } else {
           setJobs(defaultJobs);
         }
+        setLastUpdated(new Date());
       }
     } catch (error) {
       console.error("Failed to load jobs:", error);
+    } finally {
+      setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadJobs();
+
+    // Listen for job updates to refresh data
+    const handleJobUpdate = () => {
+      loadJobs();
+    };
+
+    window.addEventListener("jobUpdated", handleJobUpdate);
+
+    return () => {
+      window.removeEventListener("jobUpdated", handleJobUpdate);
+    };
+  }, []);
+
+  const handlePostJobClick = () => {
+    if (!user) {
+      setLoginOpen(true);
+    } else {
+      setPostJobOpen(true);
+    }
+  };
+
   return (
     <section id="jobs" className="py-16 bg-white">
       <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-8 lg:px-12">
@@ -115,72 +154,114 @@ export function JobBoard() {
                 Exclusive opportunities shared by fellow alumni
               </p>
             </div>
-            <Button variant="outline">Post a Job</Button>
+          </div>
+
+          {/* Refresh and status section */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex items-center gap-4"></div>
+            {jobs.length > 0 && (
+              <div className="text-sm text-gray-600">
+                Showing {jobs.length} jobs
+              </div>
+            )}
           </div>
 
           <div className="space-y-4">
-            {jobs.map((job) => (
-              <Card key={job.id} className="hover:shadow-md transition-shadow">
-                <CardHeader>
-                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                    <div className="space-y-2 flex-1">
-                      <div className="flex items-start gap-3">
-                        <div className="p-2 rounded-lg bg-blue-100">
-                          <Building2 className="h-6 w-6 text-blue-600" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="line-clamp-1">{job.title}</h3>
-                          <p className="text-sm text-gray-600">{job.company}</p>
+            {jobs.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-lg text-gray-600">
+                  No jobs posted yet. Be the first to share an opportunity!
+                </p>
+                <Button
+                  variant="outline"
+                  className="mt-4"
+                  onClick={handlePostJobClick}
+                >
+                  Post First Job
+                </Button>
+              </div>
+            ) : (
+              jobs.map((job) => (
+                <Card
+                  key={job.id}
+                  className="hover:shadow-md transition-shadow"
+                >
+                  <CardHeader>
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                      <div className="space-y-2 flex-1">
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 rounded-lg bg-blue-100">
+                            <Building2 className="h-6 w-6 text-blue-600" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="line-clamp-1">{job.title}</h3>
+                            <p className="text-sm text-gray-600">
+                              {job.company}
+                            </p>
+                          </div>
                         </div>
                       </div>
+                      <Button>Apply Now</Button>
                     </div>
-                    <Button>Apply Now</Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 flex-shrink-0" />
-                      <span>{job.location}</span>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4 flex-shrink-0" />
+                        <span>{job.location}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Briefcase className="h-4 w-4 flex-shrink-0" />
+                        <span>{job.type}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <DollarSign className="h-4 w-4 flex-shrink-0" />
+                        <span>{job.salary}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 flex-shrink-0" />
+                        <span>{job.posted}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Briefcase className="h-4 w-4 flex-shrink-0" />
-                      <span>{job.type}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <DollarSign className="h-4 w-4 flex-shrink-0" />
-                      <span>{job.salary}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 flex-shrink-0" />
-                      <span>{job.posted}</span>
-                    </div>
-                  </div>
 
-                  <div className="flex flex-wrap gap-2">
-                    {job.tags.map((tag) => (
-                      <Badge key={tag} variant="secondary">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
+                    {job.posted && (
+                      <div className="text-sm text-gray-600">
+                        <p className="line-clamp-3">{job.posted}</p>
+                      </div>
+                    )}
 
-                  <div className="text-sm text-gray-600">
-                    Posted by{" "}
-                    <span className="text-blue-600">{job.postedBy}</span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                    {job.tags && job.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {job.tags.map((tag) => (
+                          <Badge key={tag} variant="secondary">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="text-sm text-gray-600">
+                      Posted by{" "}
+                      <span className="text-blue-600">{job.postedBy}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
 
-          <div className="text-center pt-4">
-            <Button variant="outline" size="lg">
-              View All Jobs
-            </Button>
-          </div>
+          {jobs.length > 0 && (
+            <div className="text-center pt-4">
+              <Button variant="outline" size="lg">
+                View All Jobs
+              </Button>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Dialogs */}
+      <LoginDialog open={loginOpen} onOpenChange={setLoginOpen} />
     </section>
   );
 }

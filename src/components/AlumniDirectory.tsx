@@ -210,10 +210,6 @@ export function AlumniDirectory() {
     });
   }, [alumni, searchQuery, classYear, industry]);
 
-  const handleManualRefresh = () => {
-    loadAlumni();
-  };
-
   return (
     <section id="directory" className="py-16 bg-white">
       <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-8 lg:px-12">

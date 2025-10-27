@@ -171,132 +171,130 @@ export function Header() {
 
       {/* Mobile Navigation Overlay - Fixed to cover entire screen */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
+        <div className="fixed inset-0 z-50 md:hidden flex flex-col">
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setMobileMenuOpen(false)}
           />
 
-          {/* Menu Panel - Now covers full screen */}
-          <div className="absolute inset-0 bg-white transform transition-transform duration-300 ease-in-out">
-            <div className="flex flex-col h-full">
-              {/* Header */}
-              <div className="flex items-center justify-between p-4 border-b">
-                <h2 className="text-lg font-semibold">Menu</h2>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <X className="h-5 w-5" />
-                </Button>
+          {/* Menu Panel - Now covers full height and width */}
+          <div className="relative flex-1 flex flex-col bg-white">
+            {/* Header - Fixed height */}
+            <div className="flex-shrink-0 flex items-center justify-between p-4 border-b">
+              <h2 className="text-lg font-semibold">Menu</h2>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+
+            {/* Content - Scrollable area that takes remaining space */}
+            <div className="flex-1 overflow-y-auto p-4">
+              {/* Mobile Search */}
+              <div className="flex items-center gap-2 mb-6">
+                <Search className="h-4 w-4 text-gray-400" />
+                <Input
+                  type="search"
+                  placeholder="Search alumni..."
+                  value={searchQuery}
+                  onChange={(e) => handleMobileSearch(e.target.value)}
+                  className="flex-1"
+                />
               </div>
 
-              {/* Content - Scrollable area */}
-              <div className="flex-1 overflow-y-auto p-4">
-                {/* Mobile Search */}
-                <div className="flex items-center gap-2 mb-6">
-                  <Search className="h-4 w-4 text-gray-400" />
-                  <Input
-                    type="search"
-                    placeholder="Search alumni..."
-                    value={searchQuery}
-                    onChange={(e) => handleMobileSearch(e.target.value)}
-                    className="flex-1"
-                  />
-                </div>
+              {/* Mobile Navigation Links */}
+              <nav className="flex flex-col space-y-3 mb-6">
+                <a
+                  href="#directory"
+                  className="text-lg py-4 px-4 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition-colors border border-gray-100"
+                  onClick={handleMobileNavClick}
+                >
+                  Directory
+                </a>
+                <a
+                  href="#events"
+                  className="text-lg py-4 px-4 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition-colors border border-gray-100"
+                  onClick={handleMobileNavClick}
+                >
+                  Events
+                </a>
+                <a
+                  href="#jobs"
+                  className="text-lg py-4 px-4 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition-colors border border-gray-100"
+                  onClick={handleMobileNavClick}
+                >
+                  Jobs
+                </a>
+                <a
+                  href="#news"
+                  className="text-lg py-4 px-4 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition-colors border border-gray-100"
+                  onClick={handleMobileNavClick}
+                >
+                  News
+                </a>
+              </nav>
 
-                {/* Mobile Navigation Links */}
-                <nav className="flex flex-col space-y-3 mb-6">
-                  <a
-                    href="#directory"
-                    className="text-lg py-4 px-4 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition-colors border border-gray-100"
-                    onClick={handleMobileNavClick}
-                  >
-                    Directory
-                  </a>
-                  <a
-                    href="#events"
-                    className="text-lg py-4 px-4 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition-colors border border-gray-100"
-                    onClick={handleMobileNavClick}
-                  >
-                    Events
-                  </a>
-                  <a
-                    href="#jobs"
-                    className="text-lg py-4 px-4 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition-colors border border-gray-100"
-                    onClick={handleMobileNavClick}
-                  >
-                    Jobs
-                  </a>
-                  <a
-                    href="#news"
-                    className="text-lg py-4 px-4 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition-colors border border-gray-100"
-                    onClick={handleMobileNavClick}
-                  >
-                    News
-                  </a>
-                </nav>
-
-                {/* Mobile Authentication Section */}
-                {user ? (
-                  <div className="border-t pt-4">
-                    <div className="mb-4 p-4 bg-gray-50 rounded-lg">
-                      <p className="font-medium">{user.name}</p>
-                      <p className="text-sm text-gray-500">{user.email}</p>
-                    </div>
-                    <div className="flex flex-col space-y-3">
+              {/* Mobile Authentication Section */}
+              {user ? (
+                <div className="border-t pt-4">
+                  <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+                    <p className="font-medium">{user.name}</p>
+                    <p className="text-sm text-gray-500">{user.email}</p>
+                  </div>
+                  <div className="flex flex-col space-y-3">
+                    <Button
+                      variant="ghost"
+                      className="justify-start py-4 text-base"
+                      onClick={() => {
+                        setProfileOpen(true);
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      <Settings className="h-5 w-5 mr-3" />
+                      My Profile
+                    </Button>
+                    {isModerator() && (
                       <Button
                         variant="ghost"
                         className="justify-start py-4 text-base"
                         onClick={() => {
-                          setProfileOpen(true);
+                          setAdminOpen(true);
                           setMobileMenuOpen(false);
                         }}
                       >
-                        <Settings className="h-5 w-5 mr-3" />
-                        My Profile
+                        <Shield className="h-5 w-5 mr-3" />
+                        Admin Dashboard
                       </Button>
-                      {isModerator() && (
-                        <Button
-                          variant="ghost"
-                          className="justify-start py-4 text-base"
-                          onClick={() => {
-                            setAdminOpen(true);
-                            setMobileMenuOpen(false);
-                          }}
-                        >
-                          <Shield className="h-5 w-5 mr-3" />
-                          Admin Dashboard
-                        </Button>
-                      )}
-                      <Button
-                        variant="ghost"
-                        className="justify-start py-4 text-base text-red-600 hover:text-red-700 hover:bg-red-50"
-                        onClick={() => {
-                          logout();
-                          setMobileMenuOpen(false);
-                        }}
-                      >
-                        <LogOut className="h-5 w-5 mr-3" />
-                        Logout
-                      </Button>
-                    </div>
+                    )}
+                    <Button
+                      variant="ghost"
+                      className="justify-start py-4 text-base text-red-600 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => {
+                        logout();
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      <LogOut className="h-5 w-5 mr-3" />
+                      Logout
+                    </Button>
                   </div>
-                ) : (
-                  <Button
-                    onClick={() => {
-                      setLoginOpen(true);
-                      setMobileMenuOpen(false);
-                    }}
-                    className="w-full py-6 text-base"
-                  >
-                    <User className="h-5 w-5 mr-2" />
-                    Login
-                  </Button>
-                )}
-              </div>
+                </div>
+              ) : (
+                <Button
+                  onClick={() => {
+                    setLoginOpen(true);
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full py-6 text-base"
+                >
+                  <User className="h-5 w-5 mr-2" />
+                  Login
+                </Button>
+              )}
             </div>
           </div>
         </div>

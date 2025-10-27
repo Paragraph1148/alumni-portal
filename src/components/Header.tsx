@@ -52,12 +52,6 @@ export function Header() {
 
           <nav className="hidden md:flex items-center gap-6">
             <a
-              href="#home"
-              className="text-sm hover:text-blue-600 transition-colors"
-            >
-              Home
-            </a>
-            <a
               href="#directory"
               className="text-sm hover:text-blue-600 transition-colors"
             >

@@ -2,17 +2,31 @@ import { Button } from "./ui/button";
 import { ArrowRight, Users } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "./AuthContext";
+import { useState } from "react";
+import { LoginDialog } from "./LoginDialog";
+import { UserProfile } from "./UserProfile";
 
 export function Hero() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   const handleUpdateProfile = () => {
-    navigate("/profile");
+    if (!user) {
+      // If user is not logged in, open login dialog
+      setLoginOpen(true);
+    } else {
+      // If user is logged in, open profile dialog
+      setProfileOpen(true);
+    }
   };
 
   const handleExploreDirectory = () => {
     navigate("/directory");
   };
+
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-8 lg:px-12 py-16 md:py-24">
@@ -84,6 +98,10 @@ export function Hero() {
           </div>
         </div>
       </div>
+
+      {/* Add the dialogs */}
+      <LoginDialog open={loginOpen} onOpenChange={setLoginOpen} />
+      <UserProfile open={profileOpen} onOpenChange={setProfileOpen} />
     </section>
   );
 }
